@@ -7,14 +7,17 @@ import Login from "./components/Login";
 import ChatRoom from "./components/ChatRoom";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Loading from "./components/Loading";  // Import Loading component
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);  // Add loading state
 
   // Listen for changes in authentication state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      setUser(user);  // Set user when authentication state changes
+      setLoading(false);  // Set loading to false after the auth state is resolved
     });
     return () => unsub(); // Cleanup subscription when component unmounts
   }, []);
@@ -22,12 +25,16 @@ function App() {
   // Handle logout functionality
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Sign out the user from Firebase
-      setUser(null); // Explicitly set user to null after logout
+      await signOut(auth);  // Sign out the user from Firebase
+      setUser(null);  // Set user to null after logout
     } catch (error) {
       console.error("Logout Error:", error);
     }
   };
+
+  if (loading) {
+    return <Loading />;  // Show loading screen while auth state is being checked
+  }
 
   return (
     <Router>
