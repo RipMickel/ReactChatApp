@@ -4,12 +4,18 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Import service worker registration
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';  // <-- Add this import
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+
+// Register the service worker to make your app a PWA
+serviceWorkerRegistration.register();  // <-- Register service worker here
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
