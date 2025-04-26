@@ -1,6 +1,7 @@
 import React from "react";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase"; // Ensure this is your correct Firebase setup
+import { auth } from "../firebase"; 
+import './Login.css';
 
 const Login = () => {
   const provider = new GoogleAuthProvider();  // Initialize the Google Auth Provider
