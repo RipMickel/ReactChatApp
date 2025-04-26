@@ -1,70 +1,48 @@
-import React, { useEffect, useRef, useState } from "react";
-import { db } from "../firebase";
-import {
-  addDoc,
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from "firebase/firestore";
+import React, { useState, useEffect } from 'react';
+import { db, collection, addDoc, getDocs } from '../firebase';
 
-function ChatRoom({ user }) {
+const ChatRoom = () => {
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [formValue, setFormValue] = useState("");
-  const dummy = useRef();
 
-  useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("createdAt"));
-    const unsub = onSnapshot(q, (snapshot) => {
-      setMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
-  }, []);
-
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    await addDoc(collection(db, "messages"), {
-      text: formValue,
-      createdAt: serverTimestamp(),
-      uid: user.uid,
-      photoURL: user.photoURL,
-    });
-    setFormValue("");
-    dummy.current.scrollIntoView({ behavior: "smooth" });
+  // Function to handle sending a message
+  const sendMessage = async () => {
+    if (message.trim()) {
+      await addDoc(collection(db, "messages"), {
+        text: message,
+        timestamp: new Date(),
+      });
+      setMessage(''); // Clear input after sending message
+    }
   };
 
+  // Fetch messages from Firestore when the component loads
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const querySnapshot = await getDocs(collection(db, "messages"));
+      const messagesArray = querySnapshot.docs.map(doc => doc.data());
+      setMessages(messagesArray);
+    };
+    fetchMessages();
+  }, []);
+
   return (
-    <>
-      <main>
-        {messages.map((msg) => (
-          <Message key={msg.id} message={msg} user={user} />
+    <div>
+      <h2>Chat Room</h2>
+      <div>
+        {messages.map((msg, index) => (
+          <p key={index}>{msg.text}</p>
         ))}
-        <span ref={dummy}></span>
-      </main>
-      <form onSubmit={sendMessage}>
-        <input
-          value={formValue}
-          onChange={(e) => setFormValue(e.target.value)}
-          placeholder="Say something..."
-        />
-        <button type="submit" disabled={!formValue}>
-          Send
-        </button>
-      </form>
-    </>
-  );
-}
-
-function Message({ message, user }) {
-  const isUser = message.uid === user.uid;
-
-  return (
-    <div className={`message ${isUser ? "sent" : "received"}`}>
-      <img src={message.photoURL} alt="avatar" />
-      <p>{message.text}</p>
+      </div>
+      <input 
+        type="text" 
+        value={message} 
+        onChange={(e) => setMessage(e.target.value)} 
+        placeholder="Type your message..." 
+      />
+      <button onClick={sendMessage}>Send</button>
     </div>
   );
-}
+};
 
 export default ChatRoom;
